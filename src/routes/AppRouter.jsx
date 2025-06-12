@@ -21,6 +21,7 @@ export default function AppRouter() {
         <Route element={<PrivateRoute />}>
           <Route path="/dashboard" element={<Dashboard />}>
             <Route index element={<Overview />} />
+            <Route path="overview" element={<Overview />} />
             <Route path="history" element={<History />} />
           </Route>
           <Route path="/data-entry" element={<DataEntry />} />
