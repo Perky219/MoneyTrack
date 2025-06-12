@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { set } from "date-fns";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -75,7 +74,7 @@ export default function DataForm({ initialData, onSave, onDelete }) {
     setFormData((f) => ({
       ...f,
       [name]: name === "type" ? value : value,
-      ...API_URL(name === "type" ? { category: "" } : {}),
+      ...(name === "type" ? { category: "" } : {}),
     }));
   };
 
@@ -211,6 +210,7 @@ export default function DataForm({ initialData, onSave, onDelete }) {
             placeholder="Selecciona un tipo"
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           >
+            <option value="">Seleccione una opción</option>
             <option value="expense">Gasto</option>
             <option value="saving">Ahorro</option>
             <option value="investment">Inversión</option>
@@ -233,6 +233,7 @@ export default function DataForm({ initialData, onSave, onDelete }) {
               placeholder="Selecciona una categoría"
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             >
+              <option value="">Seleccione una opción</option>
               {categories[formData.type]?.map((category) => (
                 <option key={category.value} value={category.value}>
                   {category.label}
