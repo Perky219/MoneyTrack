@@ -5,6 +5,18 @@ const PieChart = ({ title, data, options = {}, className = "" }) => {
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
 
+  const values = data.datasets?.[0]?.data || [];
+  const hasData = values.some((value) => value > 0);
+
+  if (!hasData) {
+    return (
+      <div className={`bg-white rounded-lg shadow-md p-4 ${className}`}>
+        <h3 className="text-lg font-medium text-gray-900 mb-4">{title}</h3>
+        <p className="text-gray-500">No hay datos disponibles.</p>
+      </div>
+    );
+  }
+
   useEffect(() => {
     if (!chartRef.current) return;
 
