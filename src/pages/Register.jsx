@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { toast } from "react-toastify";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Register = () => {
   const navigate = useNavigate();
   const { register } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -61,7 +64,6 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
 
     if (!validateForm()) return;
 
@@ -69,20 +71,41 @@ const Register = () => {
     try {
       await register({
         email: formData.email,
-        username: formData.username || null,
+        username: formData.username || undefined,
         password: formData.password,
-        metas: {
-          spending: parseFloat(formData.spendingGoal) || 0,
-          saving: parseFloat(formData.savingGoal) || 0,
-          investment: parseFloat(formData.investmentGoal) || 0,
-        },
       });
-      // Redirigimos inmediatamente y pasamos mensaje a login
-      navigate("/login", {
-        state: { success: "Cuenta creada exitosamente. Inicia sesión." },
-      });
+
+      const today = new Date().toISOString().split("T")[0];
+      const goals = [
+        { key: "spendingGoal", type: "expense" },
+        { key: "savingGoal", type: "saving" },
+        { key: "investmentGoal", type: "investment" },
+      ];
+      await Promise.all(
+        goals
+          .filter(({ key }) => parseFloat(formData[key]) > 0)
+          .map(({ key, type }) =>
+            fetch(`${API_URL}/goals/${type}`, {
+              method: "POST",
+              credentials: "include",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                date: today,
+                value: parseFloat(formData[key]),
+              }),
+            }).then((response) => {
+              if (!response.ok)
+                throw new Error(`Error al guardar la meta ${type}`);
+            })
+          )
+      );
+      toast.success("Cuenta creada exitosamente");
+      setTimeout(() => navigate("/login"), 1500);
     } catch (err) {
-      setError(err.message || "Error al crear la cuenta");
+      console.error(err);
+      toast.error(err.message || "Error al crear la cuenta");
     } finally {
       setIsLoading(false);
     }
