@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -49,63 +49,96 @@ const AddIncome = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <h1 className="text-2xl font-bold mb-4">Nuevo Ingreso</h1>
-
-      {error && (
-        <div className="p-3 mb-4 bg-red-100 text-red-700 rounded">{error}</div>
-      )}
-      {success && (
-        <div className="p-3 mb-4 bg-green-100 text-green-700 rounded">
-          {success}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium">Fecha *</label>
-          <DatePicker
-            selected={dateObj}
-            onChange={setDateObj}
-            dateFormat="yyyy-MM-dd"
-            onChangeRaw={(e) => e.preventDefault()}
-            className="mt-1 w-full px-3 py-2 border rounded"
-            required
-          />
+    <div className="max-w-2xl mx-auto">
+      <h1 className="text-2xl font-bold text-gray-900 mb-4">
+        Registra un Nuevo Ingreso
+      </h1>
+      <div className="w-full max-2-md p-6 bg-white rounded-lg shadow-lg">
+        <div className="space-y-2 text-center">
+          <h1 className="text-3xl font-bold text-gray-900">Nuevo Ingreso</h1>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium">Monto *</label>
-          <input
-            type="number"
-            step="0.01"
-            min="0.01"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            className="mt-1 w-full px-3 py-2 border rounded"
-            placeholder="0.00"
-            required
-          />
-        </div>
+        {error && (
+          <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">{error}</div>
+        )}
+        {success && (
+          <div className="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+            {success}
+          </div>
+        )}
 
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            disabled={isLoading}
-            className="flex-1 py-2 border rounded bg-gray-100 hover:bg-gray-200"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="flex-1 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            {isLoading ? "Guardando..." : "Guardar Ingreso"}
-          </button>
-        </div>
-      </form>
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+          <div>
+            <label className="block w-full text-sm font-medium text-gray-700">Fecha *</label>
+            <DatePicker
+              selected={dateObj}
+              onChange={setDateObj}
+              dateFormat="yyyy-MM-dd"
+              onChangeRaw={(e) => e.preventDefault()}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Monto *</label>
+            <input
+              type="number"
+              step="0.01"
+              min="0.01"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="0.00"
+              required
+            />
+          </div>
+
+          <div className="flex gap-2 pt-4">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              disabled={isLoading}
+              className="flex-1 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="flex-1 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            >
+              {isLoading ? (
+                <>
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Guardando...
+                </>
+              ) : (
+                "Guardar"
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
