@@ -58,14 +58,15 @@ const Overview = () => {
         })
         .then((records) => {
           // quedarnos con los 5 más recientes
+          const singular = { expenses: "expense", savings: "saving", investments: "investment" }[type];
           const latest = records
             .sort((a, b) => new Date(b.date) - new Date(a.date))
             .slice(0, 5)
-            .map((r) => ({
+            .map(r => ({
               date: r.date.slice(0, 10),
               amount: `$${Number(r.amount).toFixed(2)}`,
               category: r.category,
-              type, // guardamos el tipo para el click
+              type: singular
             }));
           setter(latest);
         })
@@ -112,7 +113,7 @@ const Overview = () => {
     });
 
   const handleRowClick = (row) =>
-    navigate("/edit-entry", { state: { data: row } });
+    navigate(`/edit-entry/${row.type}/${row.date}`);
 
   const tableColumns = [
     { Header: "Fecha", accessor: "date" },

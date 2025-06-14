@@ -14,14 +14,28 @@ const EditEntry = () => {
   // 1) Traer registro existente
   useEffect(() => {
     (async () => {
+      // 1) mapear singular → plural para la ruta
+      const pluralMap = {
+        expense: "expenses",
+        saving: "savings",
+        investment: "investments",
+      };
+      const endpoint = pluralMap[type];
+      if (!endpoint) {
+        setError("Tipo inválido");
+        setLoading(false);
+        return;
+      }
+
       try {
         const res = await fetch(
-          `${API_URL}/records/${type}?start_date=${date}&end_date=${date}`,
+          `${API_URL}/records/${endpoint}?start_date=${date}&end_date=${date}`,
           { credentials: "include" }
         );
         if (!res.ok) throw new Error("No pude cargar el registro.");
         const arr = await res.json();
         if (!arr.length) throw new Error("Registro no encontrado.");
+        // añadimos el tipo original para que DataForm lo use
         setInitialData({ ...arr[0], type });
       } catch (err) {
         setError(err.message);
@@ -37,8 +51,8 @@ const EditEntry = () => {
       expense: "expenses",
       saving: "savings",
       investment: "investments",
-    }[formData.type];
-    const res = await fetch(`${API_URL}/${endpoint}`, {
+    }[type];
+    const res = await fetch(`${API_URL}/${endpoint}/${initialData.id}`, {
       method: "PUT",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -48,8 +62,11 @@ const EditEntry = () => {
         category: formData.category,
       }),
     });
-    if (!res.ok)
-      throw new Error((await res.json()).detail || "Error guardando");
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || "Error guardando");
+    }
+    navigate("/dashboard");
   };
 
   // 3) Eliminar
@@ -59,11 +76,9 @@ const EditEntry = () => {
       saving: "savings",
       investment: "investments",
     }[type];
-    const res = await fetch(`${API_URL}/${endpoint}`, {
+    const res = await fetch(`${API_URL}/${endpoint}/${initialData.id}`, {
       method: "DELETE",
       credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ date: initialData.date }),
     });
     if (!res.ok) throw new Error("Error eliminando");
     navigate("/dashboard");
