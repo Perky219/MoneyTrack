@@ -5,9 +5,9 @@ import "react-datepicker/dist/react-datepicker.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-// Parsea "YYYY-MM-DD" como fecha local, evitando el offset UTC de new Date(string)
+// Parsea fechas como local, soporta "YYYY-MM-DD" y "YYYY-MM-DDTHH:MM:SS"
 const parseLocalDate = (dateStr) => {
-  const [year, month, day] = dateStr.split("-").map(Number);
+  const [year, month, day] = dateStr.slice(0, 10).split("-").map(Number);
   return new Date(year, month - 1, day);
 };
 
