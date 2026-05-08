@@ -39,12 +39,12 @@ const Profile = () => {
         });
         const [expense, saving, investment] = await Promise.all(goalsPromises);
 
-        setFormData({
-          ...formData,
+        setFormData((f) => ({
+          ...f,
           spendingGoal: expense,
           savingGoal: saving,
           investmentGoal: investment,
-        });
+        }));
       } catch (error) {
         console.error(error);
         setError("Error cargando los datos");
@@ -53,7 +53,7 @@ const Profile = () => {
       }
     }
     loadProfile();
-  }, [API_URL]);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

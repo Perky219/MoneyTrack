@@ -5,28 +5,34 @@ import "react-datepicker/dist/react-datepicker.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+// Parsea "YYYY-MM-DD" como fecha local, evitando el offset UTC de new Date(string)
+const parseLocalDate = (dateStr) => {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day);
+};
+
 const categories = {
   expense: [
     { value: "vivienda", label: "Vivienda" },
-    { value: "alimentacion", label: "Alimentación" },
+    { value: "alimentación", label: "Alimentación" },
     { value: "transporte", label: "Transporte" },
     { value: "salud", label: "Salud" },
-    { value: "educacion", label: "Educación" },
+    { value: "educación", label: "Educación" },
     { value: "entretenimiento", label: "Entretenimiento" },
     { value: "ropa", label: "Ropa" },
     { value: "otros", label: "Otros" },
   ],
   saving: [
     { value: "fondo_emergencia", label: "Fondo de Emergencia" },
-    { value: "jubilacion", label: "Jubilación" },
+    { value: "jubilación", label: "Jubilación" },
     { value: "vacaciones", label: "Vacaciones" },
     { value: "mantenimiento", label: "Mantenimiento" },
     { value: "otros", label: "Otros" },
   ],
   investment: [
-    { value: "fondo_inversion", label: "Fondo de Inversión" },
+    { value: "fondo de inversión", label: "Fondo de Inversión" },
     { value: "acciones", label: "Acciones" },
-    { value: "bienes_raices", label: "Bienes Raíces" },
+    { value: "bienes raíces", label: "Bienes Raíces" },
     { value: "cripto", label: "Criptomonedas" },
     { value: "negocio", label: "Negocio" },
     { value: "otros", label: "Otros" },
@@ -36,7 +42,7 @@ const categories = {
 export default function DataForm({ initialData, onSave, onDelete }) {
   const navigate = useNavigate();
   const [dateObj, setDateObj] = useState(
-    initialData ? new Date(initialData.date) : new Date()
+    initialData ? parseLocalDate(initialData.date) : new Date()
   );
   const [formData, setFormData] = useState({
     date: dateObj.toISOString().slice(0, 10),
@@ -50,7 +56,7 @@ export default function DataForm({ initialData, onSave, onDelete }) {
 
   useEffect(() => {
     if (initialData) {
-      const d = new Date(initialData.date);
+      const d = parseLocalDate(initialData.date);
       setDateObj(d);
       setFormData({
         date: d.toISOString().slice(0, 10),
@@ -73,7 +79,7 @@ export default function DataForm({ initialData, onSave, onDelete }) {
 
     setFormData((f) => ({
       ...f,
-      [name]: name === "type" ? value : value,
+      [name]: value,
       ...(name === "type" ? { category: "" } : {}),
     }));
   };

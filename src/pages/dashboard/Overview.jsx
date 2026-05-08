@@ -12,14 +12,15 @@ const Overview = () => {
   const [expensesData, setExpensesData] = useState([]);
   const [savingsData, setSavingsData] = useState([]);
   const [investmentsData, setInvestmentsData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const today = new Date();
     const year = today.getFullYear();
-    const month = today.getMonth() + 1; // 1–12
+    const month = today.getMonth() + 1;
 
-    // 1) Monthly summary
-    fetch(`${API_URL}/monthly-summary/${year}/${month}`, {
+    const summaryPromise = fetch(`${API_URL}/monthly-summary/${year}/${month}`, {
       credentials: "include",
     })
       .then((res) => {
@@ -37,19 +38,16 @@ const Overview = () => {
             saving: data.saving_goal_percentage || 0,
             investment: data.investment_goal_percentage || 0,
           },
-          expensesByCategory: data.expense_by_category,
-          savingsByCategory: data.saving_by_category,
-          investmentsByCategory: data.investment_by_category,
+          expensesByCategory: data.expense_by_category || {},
+          savingsByCategory: data.saving_by_category || {},
+          investmentsByCategory: data.investment_by_category || {},
         });
-      })
-      .catch(console.error);
+      });
 
-    // 2) Últimos 5 de cada tipo
     const fetchRecent = (type, setter) => {
-      // obtenemos desde el 1 del mes hasta hoy
       const start = `${year}-${String(month).padStart(2, "0")}-01`;
       const end = today.toISOString().slice(0, 10);
-      fetch(`${API_URL}/records/${type}?start_date=${start}&end_date=${end}`, {
+      return fetch(`${API_URL}/records/${type}?start_date=${start}&end_date=${end}`, {
         credentials: "include",
       })
         .then((res) => {
@@ -57,38 +55,61 @@ const Overview = () => {
           return res.json();
         })
         .then((records) => {
-          // quedarnos con los 5 más recientes
           const singular = { expenses: "expense", savings: "saving", investments: "investment" }[type];
           const latest = records
             .sort((a, b) => new Date(b.date) - new Date(a.date))
             .slice(0, 5)
-            .map(r => ({
+            .map((r) => ({
               date: r.date.slice(0, 10),
               amount: `$${Number(r.amount).toFixed(2)}`,
               category: r.category,
-              type: singular
+              type: singular,
             }));
           setter(latest);
-        })
-        .catch(console.error);
+        });
     };
 
-    fetchRecent("expenses", setExpensesData);
-    fetchRecent("savings", setSavingsData);
-    fetchRecent("investments", setInvestmentsData);
+    Promise.all([
+      summaryPromise,
+      fetchRecent("expenses", setExpensesData),
+      fetchRecent("savings", setSavingsData),
+      fetchRecent("investments", setInvestmentsData),
+    ])
+      .catch((err) => setError(err.message || "Error al cargar los datos"))
+      .finally(() => setLoading(false));
   }, []);
 
-  if (!financialData) {
-    return <div>Cargando...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+      </div>
+    );
   }
 
-  // Pie data dinámico
+  if (error) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 font-medium">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!financialData) return null;
+
   const makePieData = (obj) => ({
     labels: Object.keys(obj),
     datasets: [{ data: Object.values(obj) }],
   });
 
-  // Porcentajes actuales
   const {
     monthlyIncome,
     monthlyExpenses,
@@ -96,10 +117,11 @@ const Overview = () => {
     monthlyInvestments,
     goals,
   } = financialData;
-  const currentSpendingPercentage = (monthlyExpenses / monthlyIncome) * 100;
-  const currentSavingPercentage = (monthlySavings / monthlyIncome) * 100;
-  const currentInvestmentPercentage =
-    (monthlyInvestments / monthlyIncome) * 100;
+
+  // Guard contra división por cero si aún no hay ingreso registrado
+  const currentSpendingPercentage = monthlyIncome > 0 ? (monthlyExpenses / monthlyIncome) * 100 : 0;
+  const currentSavingPercentage = monthlyIncome > 0 ? (monthlySavings / monthlyIncome) * 100 : 0;
+  const currentInvestmentPercentage = monthlyIncome > 0 ? (monthlyInvestments / monthlyIncome) * 100 : 0;
 
   const handleIncomeClick = () =>
     navigate("/add-income", {
