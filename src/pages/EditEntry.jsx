@@ -64,7 +64,8 @@ const EditEntry = () => {
     });
     if (!res.ok) {
       const err = await res.json();
-      throw new Error(err.detail || "Error guardando");
+      const detail = err.detail;
+      throw new Error(Array.isArray(detail) ? detail.map((e) => e.msg).join(", ") : detail || "Error guardando");
     }
     navigate("/dashboard");
   };

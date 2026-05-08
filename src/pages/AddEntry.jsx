@@ -24,7 +24,11 @@ const AddEntry = () => {
         category: formData.category,
       }),
     });
-    if (!res.ok) throw new Error((await res.json()).detail || "Error creando");
+    if (!res.ok) {
+      const err = await res.json();
+      const detail = err.detail;
+      throw new Error(Array.isArray(detail) ? detail.map((e) => e.msg).join(", ") : detail || "Error creando");
+    }
   };
 
   return (

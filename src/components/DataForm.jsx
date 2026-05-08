@@ -23,7 +23,7 @@ const categories = {
     { value: "otros", label: "Otros" },
   ],
   saving: [
-    { value: "fondo_emergencia", label: "Fondo de Emergencia" },
+    { value: "fondo de emergencia", label: "Fondo de Emergencia" },
     { value: "jubilación", label: "Jubilación" },
     { value: "vacaciones", label: "Vacaciones" },
     { value: "mantenimiento", label: "Mantenimiento" },
